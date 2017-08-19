@@ -1,0 +1,7 @@
+version: '3.2'
+services:
+  test:
+    image: node
+    volumes:
+      - ./tests:/tests
+    command: "node /tests"
