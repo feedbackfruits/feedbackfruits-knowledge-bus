@@ -3,34 +3,25 @@ jobs:
   build:
     working_directory: ~/feedbackfruits-knowledge-bus
     docker:
-      # - image: github.com/feedbackfruits/feedbackfruits-knowledge-bus:latest
-      # - image: node:latest
-      #   environment:
-      #     NODE_ENV: test
-    # steps:
-      # - checkout
-      # - restore_cache:
-      #     keys:
-      #     - node_modules-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-      #     - node_modules-
-      #
-      # - run:
-      #     name: Install dependencies
-      #     command: npm install
-      #
-      # - save_cache:
-      #     paths:
-      #       - node_modules
-      #     key: node_modules-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-      #
-      # - run: npm test
+      - image: node:latest
+    steps:
+      - checkout
 
-      # - deploy:
-      #     name: Deploy to Heroku
-      #     command: |
-      #       ssh-keyscan -H heroku.com >> ~/.ssh/known_hosts
-      #       if [ "${CIRCLE_BRANCH}" == "master" ]; then
-      #         git push git@heroku.com:staging-fbf-knowledge-graph-b.git $CIRCLE_SHA1:refs/heads/master -f
-      #       elif [[ $CIRCLE_TAG =~ ^v[0-9]+\.[0-9]+ ]]; then
-      #         git push git@heroku.com:fbf-knowledge-graph-broker.git $CIRCLE_SHA1:refs/heads/master -f
-      #       fi
+      - run:
+          name: Install Docker Compose
+          command: |
+            set -x
+            curl -L https://github.com/docker/compose/releases/download/1.15.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+            chmod +x /usr/local/bin/docker-compose
+
+      - setup_remote_docker
+
+      - run:
+          name: Start container and verify it's working
+          command: |
+            set -x
+            docker-compose up -d
+
+      - run:
+          name: Run tests
+          command: node tests
